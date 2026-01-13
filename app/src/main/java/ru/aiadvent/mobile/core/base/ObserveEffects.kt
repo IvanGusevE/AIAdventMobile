@@ -1,4 +1,4 @@
-package ru.aiadvent.mobile.base
+package ru.aiadvent.mobile.core.base
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

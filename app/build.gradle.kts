@@ -22,7 +22,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "MISTRAL_API_KEY", "\"API_KEY\"")
+        buildConfigField("String", "MISTRAL_API_KEY", "\"TUiZE8PEa6f52E7mslEcBTmVOOUdNKSR\"")
     }
 
     buildTypes {

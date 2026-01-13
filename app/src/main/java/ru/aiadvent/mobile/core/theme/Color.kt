@@ -1,4 +1,4 @@
-package ru.aiadvent.mobile.ui.theme
+package ru.aiadvent.mobile.core.theme
 
 import androidx.compose.ui.graphics.Color
 

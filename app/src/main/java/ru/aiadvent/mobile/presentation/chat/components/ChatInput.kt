@@ -1,4 +1,4 @@
-package ru.aiadvent.mobile.ui.chat.components
+package ru.aiadvent.mobile.presentation.chat.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

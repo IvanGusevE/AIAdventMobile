@@ -1,4 +1,4 @@
-package ru.aiadvent.mobile.base
+package ru.aiadvent.mobile.core.base
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

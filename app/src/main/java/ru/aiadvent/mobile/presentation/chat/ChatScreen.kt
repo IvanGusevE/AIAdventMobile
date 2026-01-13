@@ -1,17 +1,13 @@
-package ru.aiadvent.mobile.ui.chat
+package ru.aiadvent.mobile.presentation.chat
 
-import android.view.WindowInsets.Type.ime
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,10 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import ru.aiadvent.mobile.base.ObserveEffects
-import ru.aiadvent.mobile.ui.chat.components.ChatInput
-import ru.aiadvent.mobile.ui.chat.components.MessageBubble
-import ru.aiadvent.mobile.ui.chat.components.TypingIndicator
+import ru.aiadvent.mobile.core.base.ObserveEffects
+import ru.aiadvent.mobile.presentation.chat.components.ChatInput
+import ru.aiadvent.mobile.presentation.chat.components.MessageBubble
+import ru.aiadvent.mobile.presentation.chat.components.TypingIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +54,7 @@ fun ChatScreen(
 
     ObserveEffects(viewModel.effects) { effect ->
         when (effect) {
-            is ChatEffect.ShowError -> {
+            is Effect.ShowError -> {
                 launch { snackbarHostState.showSnackbar(effect.message) }
             }
         }
@@ -87,8 +83,8 @@ fun ChatScreen(
         bottomBar = {
             ChatInput(
                 text = state.inputText,
-                onTextChanged = { viewModel.onEvent(ChatEvent.OnInputChanged(it)) },
-                onSendClick = { viewModel.onEvent(ChatEvent.OnSendClick) },
+                onTextChanged = { viewModel.onEvent(Event.OnInputChanged(it)) },
+                onSendClick = { viewModel.onEvent(Event.OnSendClick) },
                 enabled = !state.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -112,7 +108,7 @@ fun ChatScreen(
                 ) {
                     items(
                         items = state.messages,
-                        key = { it.id }
+                        key = { it.timestamp }
                     ) { message ->
                         MessageBubble(
                             message = message,
@@ -121,9 +117,7 @@ fun ChatScreen(
                     }
 
                     if (state.isLoading) {
-                        item {
-                            TypingIndicator()
-                        }
+                        item { TypingIndicator() }
                     }
                 }
             }

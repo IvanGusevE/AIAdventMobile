@@ -1,5 +1,6 @@
 package ru.aiadvent.mobile.di
 
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -9,8 +10,6 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
-import ru.aiadvent.mobile.data.remote.MistralApiService
-import ru.aiadvent.mobile.data.remote.MistralApiServiceImpl
 
 val networkModule = module {
 
@@ -31,15 +30,11 @@ val networkModule = module {
             install(Logging) {
                 logger = object : Logger {
                     override fun log(message: String) {
-                        android.util.Log.d("KtorClient", message)
+                        Log.d("KtorClient", message)
                     }
                 }
                 level = LogLevel.BODY
             }
         }
-    }
-
-    single<MistralApiService> {
-        MistralApiServiceImpl(client = get())
     }
 }

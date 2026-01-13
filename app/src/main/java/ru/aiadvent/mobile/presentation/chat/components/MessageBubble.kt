@@ -1,4 +1,4 @@
-package ru.aiadvent.mobile.ui.chat.components
+package ru.aiadvent.mobile.presentation.chat.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import ru.aiadvent.mobile.data.model.MessageRole
-import ru.aiadvent.mobile.ui.chat.ChatUiMessage
+import ru.aiadvent.mobile.domain.model.MessageRole
+import ru.aiadvent.mobile.presentation.chat.model.ChatUiMessage
 
 @Composable
 fun MessageBubble(

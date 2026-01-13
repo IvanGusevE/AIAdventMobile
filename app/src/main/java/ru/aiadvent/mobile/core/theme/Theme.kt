@@ -1,6 +1,5 @@
-package ru.aiadvent.mobile.ui.theme
+package ru.aiadvent.mobile.core.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
