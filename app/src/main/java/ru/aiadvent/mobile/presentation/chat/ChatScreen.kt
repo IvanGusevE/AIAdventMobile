@@ -2,17 +2,14 @@ package ru.aiadvent.mobile.presentation.chat
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -81,15 +78,16 @@ fun ChatScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
-            ChatInput(
-                text = state.inputText,
-                onTextChanged = { viewModel.onEvent(Event.OnInputChanged(it)) },
-                onSendClick = { viewModel.onEvent(Event.OnSendClick) },
-                enabled = !state.isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
-            )
+            BottomAppBar(modifier = Modifier.imePadding()) {
+                ChatInput(
+                    text = state.inputText,
+                    onTextChanged = { viewModel.onEvent(Event.OnInputChanged(it)) },
+                    onSendClick = { viewModel.onEvent(Event.OnSendClick) },
+                    enabled = !state.isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
         }
     ) { paddingValues ->
         Box(
