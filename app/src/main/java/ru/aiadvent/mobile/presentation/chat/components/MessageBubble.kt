@@ -30,7 +30,6 @@ fun MessageBubble(
         horizontalArrangement = when (message.role) {
             MessageRole.USER -> Arrangement.End
             MessageRole.ASSISTANT -> Arrangement.Start
-            MessageRole.SYSTEM -> Arrangement.Center
         }
     ) {
         Column(
@@ -53,15 +52,12 @@ fun MessageBubble(
                                 bottomStart = 4.dp,
                                 bottomEnd = 20.dp
                             )
-
-                            MessageRole.SYSTEM -> RoundedCornerShape(20.dp)
                         }
                     )
                     .background(
                         when (message.role) {
                             MessageRole.USER -> MaterialTheme.colorScheme.primaryContainer
                             MessageRole.ASSISTANT -> MaterialTheme.colorScheme.secondaryContainer
-                            MessageRole.SYSTEM -> MaterialTheme.colorScheme.tertiaryContainer
                         }
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -72,7 +68,6 @@ fun MessageBubble(
                     color = when (message.role) {
                         MessageRole.USER -> MaterialTheme.colorScheme.onPrimaryContainer
                         MessageRole.ASSISTANT -> MaterialTheme.colorScheme.onSecondaryContainer
-                        MessageRole.SYSTEM -> MaterialTheme.colorScheme.onTertiaryContainer
                     }
                 )
             }

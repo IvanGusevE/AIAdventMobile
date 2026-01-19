@@ -9,8 +9,12 @@ data class State(
     val isLoading: Boolean = false,
     val selectedPromptType: PromptType = PromptType.GENERAL_ASSISTANT,
     val isPromptMenuExpanded: Boolean = false,
-    val customSystemPrompt: String = "",
-    val isSystemPromptDialogVisible: Boolean = false,
+    val paramsDialog: ChatParamsDialog? = null
+)
+
+data class ChatParamsDialog(
+    val systemPrompt: String,
+    val temperature: Double
 )
 
 sealed interface Event {
@@ -19,11 +23,14 @@ sealed interface Event {
     data object OnPromptMenuClick : Event
     data object OnPromptMenuDismiss : Event
     data class OnPromptTypeSelected(val promptType: PromptType) : Event
-    data object OnSystemPromptDialogOpen : Event
-    data object OnSystemPromptDialogDismiss : Event
-    data class OnSystemPromptChanged(val prompt: String) : Event
-    data object OnSystemPromptApply : Event
-    data object OnSystemPromptClear : Event
+    data object OnChatParamsDialogOpen : Event
+    data object OnChatParamsDialogDismiss : Event
+    data class OnChatParamsDialogApply(
+        val systemPrompt: String,
+        val temperature: Double,
+    ) : Event
+
+    data object OnClearChatClick : Event
 }
 
 sealed interface Effect {

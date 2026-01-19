@@ -9,8 +9,9 @@ val viewModelModule = module {
         ChatViewModel(
             sendUserMessageUseCase = get(),
             observeMessagesUseCase = get(),
-            updateSystemMessageUseCase = get(),
-            getSystemMessageUseCase = get(),
+            getChatParametersUseCase = get(),
+            updateChatParametersUseCase = get(),
+            clearChartUseCase = get(),
             systemPromptProvider = get()
         )
     }

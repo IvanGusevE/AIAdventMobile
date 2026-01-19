@@ -9,8 +9,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -28,15 +34,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import ru.aiadvent.mobile.core.base.ObserveEffects
 import ru.aiadvent.mobile.presentation.chat.components.ChatInput
+import ru.aiadvent.mobile.presentation.chat.components.ChatParametersDialog
 import ru.aiadvent.mobile.presentation.chat.components.MessageBubble
 import ru.aiadvent.mobile.presentation.chat.components.PromptTypeMenu
-import ru.aiadvent.mobile.presentation.chat.components.SystemPromptDialog
 import ru.aiadvent.mobile.presentation.chat.components.TypingIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,13 +65,14 @@ fun ChatScreen(
         }
     }
 
-    if (state.isSystemPromptDialogVisible) {
-        SystemPromptDialog(
-            prompt = state.customSystemPrompt,
-            onPromptChanged = { viewModel.onEvent(Event.OnSystemPromptChanged(it)) },
-            onDismiss = { viewModel.onEvent(Event.OnSystemPromptDialogDismiss) },
-            onApply = { viewModel.onEvent(Event.OnSystemPromptApply) },
-            onClear = { viewModel.onEvent(Event.OnSystemPromptClear) }
+    state.paramsDialog?.let {
+        ChatParametersDialog(
+            prompt = it.systemPrompt,
+            temperature = it.temperature,
+            onDismiss = { viewModel.onEvent(Event.OnChatParamsDialogDismiss) },
+            onApply = { prompt, temp ->
+                viewModel.onEvent(Event.OnChatParamsDialogApply(prompt, temp))
+            },
         )
     }
 
@@ -86,14 +89,23 @@ fun ChatScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { viewModel.onEvent(Event.OnSystemPromptDialogOpen) }
+                        onClick = { viewModel.onEvent(Event.OnChatParamsDialogOpen) }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Custom System Prompt"
                         )
                     }
-                    
+
+                    IconButton(
+                        onClick = { viewModel.onEvent(Event.OnClearChatClick) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null
+                        )
+                    }
+
                     PromptTypeMenu(
                         selectedPromptType = state.selectedPromptType,
                         isExpanded = state.isPromptMenuExpanded,

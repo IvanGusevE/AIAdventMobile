@@ -4,26 +4,28 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ru.aiadvent.mobile.core.base.BaseViewModel
-import ru.aiadvent.mobile.domain.model.MessageRole
+import ru.aiadvent.mobile.domain.model.ChatParameters
 import ru.aiadvent.mobile.domain.prompt.SystemPromptProvider
-import ru.aiadvent.mobile.domain.usecase.GetSystemMessageUseCase
+import ru.aiadvent.mobile.domain.usecase.ClearChartUseCase
+import ru.aiadvent.mobile.domain.usecase.GetChatParametersUseCase
 import ru.aiadvent.mobile.domain.usecase.ObserveMessagesUseCase
 import ru.aiadvent.mobile.domain.usecase.SendUserMessageUseCase
-import ru.aiadvent.mobile.domain.usecase.UpdateSystemMessageUseCase
+import ru.aiadvent.mobile.domain.usecase.UpdateChatParametersUseCase
 import ru.aiadvent.mobile.presentation.chat.Effect.ShowError
 import ru.aiadvent.mobile.presentation.chat.model.toUi
 
 class ChatViewModel(
     private val sendUserMessageUseCase: SendUserMessageUseCase,
     private val observeMessagesUseCase: ObserveMessagesUseCase,
-    private val updateSystemMessageUseCase: UpdateSystemMessageUseCase,
-    private val getSystemMessageUseCase: GetSystemMessageUseCase,
-    private val systemPromptProvider: SystemPromptProvider
+    private val getChatParametersUseCase: GetChatParametersUseCase,
+    private val updateChatParametersUseCase: UpdateChatParametersUseCase,
+    private val systemPromptProvider: SystemPromptProvider,
+    private val clearChartUseCase: ClearChartUseCase,
 ) : BaseViewModel<State, Event, Effect>(State()) {
 
     init {
         observeMessagesUseCase()
-            .map { messages -> messages.filter { it.role != MessageRole.SYSTEM }.map { it.toUi() } }
+            .map { messages -> messages.map { it.toUi() } }
             .onEach { setState { copy(messages = it) } }
             .launchIn(scope)
     }
@@ -68,43 +70,36 @@ class ChatViewModel(
                 }
                 launch {
                     val systemPrompt = systemPromptProvider.get(event.promptType)
-                    updateSystemMessageUseCase(systemPrompt)
+                    updateChatParametersUseCase.updateSystemPrompt(systemPrompt)
                 }
             }
 
-            is Event.OnSystemPromptDialogOpen -> launch {
-                val message = getSystemMessageUseCase()
-                setState {
-                    copy(
-                        isSystemPromptDialogVisible = true,
-                        customSystemPrompt = message?.content.orEmpty()
-                    )
-                }
+            is Event.OnChatParamsDialogOpen -> launch {
+                val parameters = getChatParametersUseCase()
+                val paramsDialog = ChatParamsDialog(
+                    systemPrompt = parameters.systemPrompt,
+                    temperature = parameters.temperature
+                )
+                setState { copy(paramsDialog = paramsDialog) }
             }
 
-            is Event.OnSystemPromptDialogDismiss -> {
-                setState { copy(isSystemPromptDialogVisible = false, customSystemPrompt = "") }
+            is Event.OnChatParamsDialogDismiss -> {
+                setState { copy(paramsDialog = null) }
             }
 
-            is Event.OnSystemPromptChanged -> {
-                setState { copy(customSystemPrompt = event.prompt) }
+            is Event.OnChatParamsDialogApply -> {
+                setState { copy(paramsDialog = null) }
+
+                val params = ChatParameters(
+                    systemPrompt = event.systemPrompt,
+                    temperature = event.temperature
+                )
+
+                launch { updateChatParametersUseCase(params) }
             }
 
-            is Event.OnSystemPromptApply -> {
-                val prompt = current.customSystemPrompt.trim()
-                if (prompt.isEmpty()) {
-                    return
-                }
-
-                setState { copy(isSystemPromptDialogVisible = false) }
-
-                launch {
-                    updateSystemMessageUseCase(prompt)
-                }
-            }
-
-            Event.OnSystemPromptClear -> {
-                setState { copy(customSystemPrompt = "") }
+            Event.OnClearChatClick -> {
+                launch { clearChartUseCase() }
             }
         }
     }

@@ -19,5 +19,4 @@ enum class MessageRoleDto {
 fun MessageRole.toRemote() = when (this) {
     MessageRole.USER -> MessageRoleDto.USER
     MessageRole.ASSISTANT -> MessageRoleDto.ASSISTANT
-    MessageRole.SYSTEM -> MessageRoleDto.SYSTEM
 }
