@@ -7,8 +7,11 @@ import ru.aiadvent.mobile.presentation.chat.ChatViewModel
 val viewModelModule = module {
     viewModel {
         ChatViewModel(
-            sendMessageUseCase = get(),
-            observeMessagesUseCase = get()
+            sendUserMessageUseCase = get(),
+            observeMessagesUseCase = get(),
+            updateSystemMessageUseCase = get(),
+            getSystemMessageUseCase = get(),
+            systemPromptProvider = get()
         )
     }
 }

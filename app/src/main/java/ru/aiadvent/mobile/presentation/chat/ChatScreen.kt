@@ -28,9 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import ru.aiadvent.mobile.core.base.ObserveEffects
 import ru.aiadvent.mobile.presentation.chat.components.ChatInput
 import ru.aiadvent.mobile.presentation.chat.components.MessageBubble
+import ru.aiadvent.mobile.presentation.chat.components.PromptTypeMenu
+import ru.aiadvent.mobile.presentation.chat.components.SystemPromptDialog
 import ru.aiadvent.mobile.presentation.chat.components.TypingIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,6 +63,16 @@ fun ChatScreen(
         }
     }
 
+    if (state.isSystemPromptDialogVisible) {
+        SystemPromptDialog(
+            prompt = state.customSystemPrompt,
+            onPromptChanged = { viewModel.onEvent(Event.OnSystemPromptChanged(it)) },
+            onDismiss = { viewModel.onEvent(Event.OnSystemPromptDialogDismiss) },
+            onApply = { viewModel.onEvent(Event.OnSystemPromptApply) },
+            onClear = { viewModel.onEvent(Event.OnSystemPromptClear) }
+        )
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
@@ -66,6 +82,26 @@ fun ChatScreen(
                     Text(
                         text = "AI Chat",
                         style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                actions = {
+                    IconButton(
+                        onClick = { viewModel.onEvent(Event.OnSystemPromptDialogOpen) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Custom System Prompt"
+                        )
+                    }
+                    
+                    PromptTypeMenu(
+                        selectedPromptType = state.selectedPromptType,
+                        isExpanded = state.isPromptMenuExpanded,
+                        onMenuClick = { viewModel.onEvent(Event.OnPromptMenuClick) },
+                        onDismiss = { viewModel.onEvent(Event.OnPromptMenuDismiss) },
+                        onPromptTypeSelected = { promptType ->
+                            viewModel.onEvent(Event.OnPromptTypeSelected(promptType))
+                        }
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

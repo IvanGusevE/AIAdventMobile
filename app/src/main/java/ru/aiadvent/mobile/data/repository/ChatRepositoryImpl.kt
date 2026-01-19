@@ -16,6 +16,12 @@ class ChatRepositoryImpl(
 
     override fun observe() = localSource.observe()
 
+    override suspend fun getAll(): List<Message> = localSource.getAll()
+
+    override suspend fun refresh(messages: List<Message>) {
+        localSource.refresh(messages)
+    }
+
     override suspend fun add(message: Message) {
         localSource.add(message)
 

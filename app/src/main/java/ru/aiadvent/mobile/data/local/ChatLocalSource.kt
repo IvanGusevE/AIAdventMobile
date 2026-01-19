@@ -9,4 +9,6 @@ interface ChatLocalSource {
     suspend fun getAll(): List<Message>
 
     suspend fun add(message: Message)
+
+    suspend fun refresh(messages: List<Message>)
 }

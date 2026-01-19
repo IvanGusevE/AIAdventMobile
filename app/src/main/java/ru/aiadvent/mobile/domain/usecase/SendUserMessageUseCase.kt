@@ -4,7 +4,7 @@ import ru.aiadvent.mobile.domain.model.Message
 import ru.aiadvent.mobile.domain.model.MessageRole
 import ru.aiadvent.mobile.domain.repository.ChatRepository
 
-class SendMessageUseCase(
+class SendUserMessageUseCase(
     private val chatRepository: ChatRepository
 ) {
     suspend operator fun invoke(content: String) = runCatching {
