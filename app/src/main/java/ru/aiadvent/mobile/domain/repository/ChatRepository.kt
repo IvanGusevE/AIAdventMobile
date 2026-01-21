@@ -1,6 +1,7 @@
 package ru.aiadvent.mobile.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import ru.aiadvent.mobile.domain.model.ChatInteraction
 import ru.aiadvent.mobile.domain.model.ChatParameters
 import ru.aiadvent.mobile.domain.model.Message
 
@@ -14,4 +15,6 @@ interface ChatRepository {
     suspend fun getParameters(): ChatParameters
     suspend fun updateParameters(parameters: ChatParameters)
     suspend fun updateSystemPrompt(prompt: String)
+    
+    fun observeInteractions(): Flow<List<ChatInteraction>>
 }

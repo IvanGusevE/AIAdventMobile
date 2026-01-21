@@ -1,5 +1,7 @@
 package ru.aiadvent.mobile.presentation.chat
 
+import ru.aiadvent.mobile.domain.model.ChatInteraction
+import ru.aiadvent.mobile.domain.model.MistralModel
 import ru.aiadvent.mobile.domain.prompt.PromptType
 import ru.aiadvent.mobile.presentation.chat.model.ChatUiMessage
 
@@ -9,12 +11,15 @@ data class State(
     val isLoading: Boolean = false,
     val selectedPromptType: PromptType = PromptType.GENERAL_ASSISTANT,
     val isPromptMenuExpanded: Boolean = false,
-    val paramsDialog: ChatParamsDialog? = null
+    val paramsDialog: ChatParamsDialog? = null,
+    val isInteractionsDialogOpen: Boolean = false,
+    val interactions: List<ChatInteraction> = emptyList()
 )
 
 data class ChatParamsDialog(
     val systemPrompt: String,
-    val temperature: Double
+    val temperature: Double,
+    val model: MistralModel
 )
 
 sealed interface Event {
@@ -28,9 +33,12 @@ sealed interface Event {
     data class OnChatParamsDialogApply(
         val systemPrompt: String,
         val temperature: Double,
+        val model: MistralModel
     ) : Event
 
     data object OnClearChatClick : Event
+    data object OnInteractionsDialogOpen : Event
+    data object OnInteractionsDialogDismiss : Event
 }
 
 sealed interface Effect {

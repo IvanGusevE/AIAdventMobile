@@ -1,5 +1,6 @@
 package ru.aiadvent.mobile.data.repository
 
+import ru.aiadvent.mobile.data.local.ChatInteractionSource
 import ru.aiadvent.mobile.data.local.ChatLocalSource
 import ru.aiadvent.mobile.data.local.ChatParametersSource
 import ru.aiadvent.mobile.data.remote.MistralApiService
@@ -7,6 +8,7 @@ import ru.aiadvent.mobile.data.remote.model.ChatMessageDto
 import ru.aiadvent.mobile.data.remote.model.MessageRoleDto
 import ru.aiadvent.mobile.data.remote.model.MistralRequest
 import ru.aiadvent.mobile.data.remote.model.toRemote
+import ru.aiadvent.mobile.domain.model.ChatInteraction
 import ru.aiadvent.mobile.domain.model.ChatParameters
 import ru.aiadvent.mobile.domain.model.Message
 import ru.aiadvent.mobile.domain.model.MessageRole
@@ -15,7 +17,8 @@ import ru.aiadvent.mobile.domain.repository.ChatRepository
 class ChatRepositoryImpl(
     private val mistralApiService: MistralApiService,
     private val localSource: ChatLocalSource,
-    private val parametersSource: ChatParametersSource
+    private val parametersSource: ChatParametersSource,
+    private val interactionSource: ChatInteractionSource
 ) : ChatRepository {
 
     override fun observe() = localSource.observe()
@@ -40,12 +43,28 @@ class ChatRepositoryImpl(
             addAll(history)
         }
 
-        val request = MistralRequest.default(
+        val request = MistralRequest(
+            model = parameters.model.modelId,
             messages = messages,
             temperature = parameters.temperature
         )
 
+        val startTime = System.currentTimeMillis()
         val response = mistralApiService.send(request).getOrThrow()
+        val responseTime = System.currentTimeMillis() - startTime
+
+        val usage = response.usage
+        if (usage != null) {
+            val interaction = ChatInteraction(
+                completionTokens = usage.completionTokens,
+                promptTokens = usage.promptTokens,
+                totalTokens = usage.totalTokens,
+                created = System.currentTimeMillis(),
+                model = response.model,
+                responseTimeMs = responseTime
+            )
+            interactionSource.add(interaction)
+        }
 
         val assistantContent = response.choices.firstOrNull()?.message?.content
         if (assistantContent != null) {
@@ -67,4 +86,6 @@ class ChatRepositoryImpl(
     override suspend fun updateSystemPrompt(prompt: String) {
         parametersSource.updateSystemPrompt(prompt)
     }
+
+    override fun observeInteractions() = interactionSource.observe()
 }

@@ -8,6 +8,7 @@ import ru.aiadvent.mobile.domain.model.ChatParameters
 import ru.aiadvent.mobile.domain.prompt.SystemPromptProvider
 import ru.aiadvent.mobile.domain.usecase.ClearChartUseCase
 import ru.aiadvent.mobile.domain.usecase.GetChatParametersUseCase
+import ru.aiadvent.mobile.domain.usecase.ObserveChatInteractionsUseCase
 import ru.aiadvent.mobile.domain.usecase.ObserveMessagesUseCase
 import ru.aiadvent.mobile.domain.usecase.SendUserMessageUseCase
 import ru.aiadvent.mobile.domain.usecase.UpdateChatParametersUseCase
@@ -17,6 +18,7 @@ import ru.aiadvent.mobile.presentation.chat.model.toUi
 class ChatViewModel(
     private val sendUserMessageUseCase: SendUserMessageUseCase,
     private val observeMessagesUseCase: ObserveMessagesUseCase,
+    private val observeChatInteractionsUseCase: ObserveChatInteractionsUseCase,
     private val getChatParametersUseCase: GetChatParametersUseCase,
     private val updateChatParametersUseCase: UpdateChatParametersUseCase,
     private val systemPromptProvider: SystemPromptProvider,
@@ -27,6 +29,10 @@ class ChatViewModel(
         observeMessagesUseCase()
             .map { messages -> messages.map { it.toUi() } }
             .onEach { setState { copy(messages = it) } }
+            .launchIn(scope)
+
+        observeChatInteractionsUseCase()
+            .onEach { setState { copy(interactions = it) } }
             .launchIn(scope)
     }
 
@@ -78,7 +84,8 @@ class ChatViewModel(
                 val parameters = getChatParametersUseCase()
                 val paramsDialog = ChatParamsDialog(
                     systemPrompt = parameters.systemPrompt,
-                    temperature = parameters.temperature
+                    temperature = parameters.temperature,
+                    model = parameters.model
                 )
                 setState { copy(paramsDialog = paramsDialog) }
             }
@@ -92,7 +99,8 @@ class ChatViewModel(
 
                 val params = ChatParameters(
                     systemPrompt = event.systemPrompt,
-                    temperature = event.temperature
+                    temperature = event.temperature,
+                    model = event.model
                 )
 
                 launch { updateChatParametersUseCase(params) }
@@ -100,6 +108,14 @@ class ChatViewModel(
 
             Event.OnClearChatClick -> {
                 launch { clearChartUseCase() }
+            }
+
+            Event.OnInteractionsDialogOpen -> {
+                setState { copy(isInteractionsDialogOpen = true) }
+            }
+
+            Event.OnInteractionsDialogDismiss -> {
+                setState { copy(isInteractionsDialogOpen = false) }
             }
         }
     }

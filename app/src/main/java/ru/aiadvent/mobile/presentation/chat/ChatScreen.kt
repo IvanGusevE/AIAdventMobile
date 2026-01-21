@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +37,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import ru.aiadvent.mobile.core.base.ObserveEffects
 import ru.aiadvent.mobile.presentation.chat.components.ChatInput
+import ru.aiadvent.mobile.presentation.chat.components.ChatInteractionsDialog
 import ru.aiadvent.mobile.presentation.chat.components.ChatParametersDialog
 import ru.aiadvent.mobile.presentation.chat.components.MessageBubble
 import ru.aiadvent.mobile.presentation.chat.components.PromptTypeMenu
@@ -69,10 +71,18 @@ fun ChatScreen(
         ChatParametersDialog(
             prompt = it.systemPrompt,
             temperature = it.temperature,
+            model = it.model,
             onDismiss = { viewModel.onEvent(Event.OnChatParamsDialogDismiss) },
-            onApply = { prompt, temp ->
-                viewModel.onEvent(Event.OnChatParamsDialogApply(prompt, temp))
+            onApply = { prompt, temp, model ->
+                viewModel.onEvent(Event.OnChatParamsDialogApply(prompt, temp, model))
             },
+        )
+    }
+
+    if (state.isInteractionsDialogOpen) {
+        ChatInteractionsDialog(
+            interactions = state.interactions,
+            onDismiss = { viewModel.onEvent(Event.OnInteractionsDialogDismiss) }
         )
     }
 
@@ -88,6 +98,15 @@ fun ChatScreen(
                     )
                 },
                 actions = {
+                    IconButton(
+                        onClick = { viewModel.onEvent(Event.OnInteractionsDialogOpen) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "View Interactions"
+                        )
+                    }
+
                     IconButton(
                         onClick = { viewModel.onEvent(Event.OnChatParamsDialogOpen) }
                     ) {

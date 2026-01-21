@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -16,24 +20,29 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ru.aiadvent.mobile.domain.model.MistralModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatParametersDialog(
     prompt: String,
     temperature: Double,
+    model: MistralModel,
     onDismiss: () -> Unit,
-    onApply: (prompt: String, temperature: Double) -> Unit,
+    onApply: (prompt: String, temperature: Double, model: MistralModel) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    var prompt by remember(prompt) { mutableStateOf(prompt) }
-    var temperature by remember(temperature) { mutableStateOf(temperature.toFloat()) }
+    var promptState by remember(prompt) { mutableStateOf(prompt) }
+    var temperatureState by remember(temperature) { mutableFloatStateOf(temperature.toFloat()) }
+    var modelState by remember(model) { mutableStateOf(model) }
+    var modelMenuExpanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -46,7 +55,7 @@ fun ChatParametersDialog(
         text = {
             Column {
                 Text(
-                    text = "Enter your custom system prompt to configure the AI assistant's behavior:",
+                    text = "Configure the AI assistant's behavior:",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -54,26 +63,67 @@ fun ChatParametersDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = prompt,
-                    onValueChange = { prompt = it },
+                    value = promptState,
+                    onValueChange = { promptState = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp),
-                    placeholder = {
-                        Text("Enter system prompt...")
-                    },
+                        .height(150.dp),
+                    label = { Text("System Prompt") },
+                    placeholder = { Text("Enter system prompt...") },
                     textStyle = MaterialTheme.typography.bodyMedium,
                     trailingIcon = {
-                        IconButton(onClick = { prompt = "" }) {
+                        IconButton(onClick = { promptState = "" }) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
-                                contentDescription = null
+                                contentDescription = "Clear"
                             )
                         }
                     }
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Model",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                ExposedDropdownMenuBox(
+                    expanded = modelMenuExpanded,
+                    onExpandedChange = { modelMenuExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = modelState.displayName,
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelMenuExpanded)
+                        },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = modelMenuExpanded,
+                        onDismissRequest = { modelMenuExpanded = false }
+                    ) {
+                        MistralModel.entries.forEach { mistralModel ->
+                            DropdownMenuItem(
+                                text = { Text(mistralModel.displayName) },
+                                onClick = {
+                                    modelState = mistralModel
+                                    modelMenuExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = "Temperature",
@@ -89,19 +139,19 @@ fun ChatParametersDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = String.format("%.2f", temperature),
+                    text = String.format("%.2f", temperatureState),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
 
                 Slider(
-                    value = temperature,
-                    onValueChange = { temperature = it },
-                    valueRange = 0.0f..1.5f,
+                    value = temperatureState,
+                    onValueChange = { temperatureState = it },
+                    valueRange = 0.0f..2.0f,
                     steps = 19,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -110,9 +160,9 @@ fun ChatParametersDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onApply(prompt, temperature.toDouble())
+                    onApply(promptState, temperatureState.toDouble(), modelState)
                 },
-                enabled = prompt.trim().isNotEmpty()
+                enabled = promptState.trim().isNotEmpty()
             ) {
                 Text("Apply")
             }
